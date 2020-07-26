@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="deploy" default="remotedebug" basedir=".">
+    <property name="dir.workspace" value="C:/OPENCV3/pleiades-4.8/pleiades/workspace"/>
+    <property name="dir.jarfile" value="//192.168.9.112/raspberry_pi"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/fx_test.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="raspberrypi_fxtest.Main"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.workspace}/raspberrypi_fxtest/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.base.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.controls.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.fxml.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.graphics.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.media.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.swing.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx.web.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/OPENCV3/javafx-sdk-11.0.2/lib/javafx-swt.jar"/>
+        </jar>
+    </target>
+
+
+  <property name="raspberrypi" value="192.168.9.112" />
+  <property name="raspberryfolder" value="/home/pi/samba" />
+  <property name="username" value="pi" />
+  <property name="password" value="raspberry" />
+
+
+  <target name="remotedebug">
+    <first id="jars">
+      <fileset dir="target" includes="**/*.jar" />
+    </first>
+    <pathconvert pathsep="," property="jar.path" refid="jars" />
+    <basename file="${jar.path}" property="jar.filename" />
+    <echo>"Found application ${jar.path}"</echo>
+
+    <echo>"Copying application to ${raspberrypi}:${raspberryfolder}/${jar.filename}"</echo>
+    <scp localfile="${jar.path}" todir="${username}:${password}@${raspberrypi}:${raspberryfolder}" trust="true" />
+
+    <echo>"Starting ${raspberrypi}:${raspberryfolder}/${jar.filename} in debug mode"</echo>
+
+    <sshexec trust="true" host="${raspberrypi}" username="${username}" password="${password}" failonerror="true" usepty="true" command="java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:4000,suspend=y -classpath ${raspberryfolder} -jar ${raspberryfolder}/${jar.filename}" />
+  </target>
+</project>
