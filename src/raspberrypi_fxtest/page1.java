@@ -1,6 +1,7 @@
 package raspberrypi_fxtest;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -26,30 +27,29 @@ public class page1 {
     boolean flg = false;
     MediaPlayer mp;
     @FXML
-    void onBt1(ActionEvent event) {
+    void onBt1(ActionEvent event) throws URISyntaxException {
     	if( !flg ) {
     		flg= true;
 	    	Platform.runLater(() ->lb1.setText("PLAY!"));
-
-			//ファイルを読み込み
-			Media m = new Media(new File("sample2.wav").toURI().toString());
-
-			//音声の再生等の操作を実行できるオブジェクト
-			mp = new MediaPlayer(m);
 
 			//再生開始
 			mp.play();
     	}else {
     		flg=false;
-    		mp.stop();
+    		mp.pause();
 	    	Platform.runLater(() ->lb1.setText("STOP"));
     	}
     }
 
     @FXML
-    void initialize() {
-        assert bt1 != null : "fx:id=\"bt1\" was not injected: check your FXML file 'main.fxml'.";
-        assert lb1 != null : "fx:id=\"lb1\" was not injected: check your FXML file 'main.fxml'.";
+    void initialize() throws URISyntaxException {
+		//ファイルを読み込み
+        String fileName = "sample2.wav";
+        File jarFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+        String inputFilePath = jarFile.getParent() + File.separator + fileName;
+        Media m = new Media(new File(inputFilePath).toURI().toString());
+		//音声の再生等の操作を実行できるオブジェクト
+		mp = new MediaPlayer(m);
 
     }
 }
